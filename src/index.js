@@ -31,16 +31,23 @@ function getTimeFunction() {
 const perfNow = getTimeFunction();
 
 /**
+ * @todo typedef constructor argument
+ */
+
+/**
  * Class computing the descriptors from accelerometer and gyroscope data.
+ * <br />
  * Example : <pre><code>
- * const mf = new MotionFeatures({ ['accIntensity', 'gyrIntensity', 'freefall', 'kick', 'shake', 'spin', 'still'] });
+ * import MotionFeatures from 'motion-features'; 
+ * const mf = new MotionFeatures({ ['accIntensity', 'kick'] });
  * </code></pre>
  * @class
  */
 class MotionFeatures {
 
 	/**
-	 *	@param {Object.Array.String} descriptors - array of required descriptors
+	 * @param {Object} initObject - object containing an array of the
+	 * required descriptors
  	 */
 	constructor(options = {}) {
 		const defaults = {
@@ -161,8 +168,10 @@ class MotionFeatures {
 	//========== interface =========//
 
 	/**
-	 * setAccelerometer {Number, Number, Number}
 	 * sets the current accelerometer values
+	 * @param {Number} x - the accelerometer's x value
+	 * @param {Number} y - the accelerometer's y value
+	 * @param {Number} z - the accelerometer's z value
 	 */
 	setAccelerometer(x, y, z) {
 		this.acc[0] = x;
@@ -171,8 +180,10 @@ class MotionFeatures {
 	}
 
 	/**
-	 * setGyroscope {Number, Number, Number}
 	 * sets the current gyroscope values
+	 * @param {Number} x - the gyroscope's x value
+	 * @param {Number} y - the gyroscope's y value
+	 * @param {Number} z - the gyroscope's z value
 	 */
 	setGyroscope(x, y, z) {
 		this.gyr[0] = x;
@@ -180,13 +191,34 @@ class MotionFeatures {
 		this.gyr[2] = z
 	}
 
-	/**
-	 * 
+  /**
+   * Callback handling the descriptors.
+   * @callback featuresCallback
+   * @param {String} err - Description of a potential error.
+   * @param {descriptors} res - Object holding the descriptor values.
+   */
+
+  /**
+   * @todo typedef each descriptor's sub-results
+   */
+
+  /***********
+   * Computed descriptors.
+   * @typedef descriptors
+   * @type {Object}
+   * @property {String} likeliest - The likeliest model's label.
+   * @property {Number} likeliestIndex - The likeliest model's index
+   * @property {Array.number} likelihoods - The array of all models' smoothed normalized likelihoods.
+   * @property {Array.number} timeProgressions - The array of all models' normalized time progressions.
+   * @property {Array.Array.number} alphas - The array of all models' states likelihoods array.
+   * @property {?Array.number} outputValues - If the model was trained with regression, the estimated float vector output.
+   * @property {?Array.number} outputCovariance - If the model was trained with regression, the output covariance matrix.
+   */
 
 	/**
-	 * update {descriptorsCallback}
-	 * triggers computing of the descriptors with the current sensor values and
+	 * triggers computation of the descriptors from the current sensor values and
 	 * pass the results to a callback
+	 * @param {descriptorsCallback} callback - the callback handling the last computed descriptors
 	 */
 	update(callback) {
 		// DEAL WITH this._elapsedTime

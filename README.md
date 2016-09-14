@@ -1,5 +1,5 @@
 # motion-features
-### A monoclass library computing a variety of gestural descriptors,
+A monoclass library computing a variety of gestural descriptors,
 taking accelerometer and gyroscope sensors data as input.
 
 #### List of available descriptors :
@@ -25,47 +25,77 @@ this module is a work in progress, use at your own risk
 
 ## MotionFeatures
 Class computing the descriptors from accelerometer and gyroscope data.
+<br />
 Example : <pre><code>
-const mf = new MotionFeatures({ ['accIntensity', 'gyrIntensity', 'freefall', 'kick', 'shake', 'spin', 'still'] });
+import MotionFeatures from 'motion-features'; 
+const mf = new MotionFeatures({ ['accIntensity', 'kick'] });
 </code></pre>
 
 **Kind**: global class  
 
 * [MotionFeatures](#MotionFeatures)
-    * [new MotionFeatures(descriptors)](#new_MotionFeatures_new)
-    * [.setAccelerometer()](#MotionFeatures+setAccelerometer)
-    * [.setGyroscope()](#MotionFeatures+setGyroscope)
-    * [.update()](#MotionFeatures+update)
+    * [new MotionFeatures(initObject)](#new_MotionFeatures_new)
+    * [.setAccelerometer(x, y, z)](#MotionFeatures+setAccelerometer)
+    * [.setGyroscope(x, y, z)](#MotionFeatures+setGyroscope)
+    * [.update(callback)](#MotionFeatures+update)
 
 <a name="new_MotionFeatures_new"></a>
 
-### new MotionFeatures(descriptors)
+### new MotionFeatures(initObject)
 
 | Param | Type | Description |
 | --- | --- | --- |
-| descriptors | <code>Object.Array.String</code> | array of required descriptors |
+| initObject | <code>Object</code> | object containing an array of the required descriptors |
 
 <a name="MotionFeatures+setAccelerometer"></a>
 
-### motionFeatures.setAccelerometer()
-setAccelerometer {Number, Number, Number}
+### motionFeatures.setAccelerometer(x, y, z)
 sets the current accelerometer values
 
 **Kind**: instance method of <code>[MotionFeatures](#MotionFeatures)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| x | <code>Number</code> | the accelerometer's x value |
+| y | <code>Number</code> | the accelerometer's y value |
+| z | <code>Number</code> | the accelerometer's z value |
+
 <a name="MotionFeatures+setGyroscope"></a>
 
-### motionFeatures.setGyroscope()
-setGyroscope {Number, Number, Number}
+### motionFeatures.setGyroscope(x, y, z)
 sets the current gyroscope values
 
 **Kind**: instance method of <code>[MotionFeatures](#MotionFeatures)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| x | <code>Number</code> | the gyroscope's x value |
+| y | <code>Number</code> | the gyroscope's y value |
+| z | <code>Number</code> | the gyroscope's z value |
+
 <a name="MotionFeatures+update"></a>
 
-### motionFeatures.update()
-/**
-update {descriptorsCallback}
-triggers computing of the descriptors with the current sensor values and
+### motionFeatures.update(callback)
+triggers computation of the descriptors from the current sensor values and
 pass the results to a callback
 
 **Kind**: instance method of <code>[MotionFeatures](#MotionFeatures)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| callback | <code>descriptorsCallback</code> | the callback handling the last computed descriptors |
+
+<hr>
+<a name="featuresCallback"></a>
+
+## featuresCallback : <code>function</code>
+Callback handling the descriptors.
+
+**Kind**: global typedef  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| err | <code>String</code> | Description of a potential error. |
+| res | <code>descriptors</code> | Object holding the descriptor values. |
+
 <hr>
