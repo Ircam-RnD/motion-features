@@ -14,8 +14,7 @@
     "prewatch": "npm run transpile",
     "watch": "./bin/runner --watch",
     "serve": "./bin/runner --serve",
-    "docs": "jsdoc2md -t docs/README.hbs src/*js > README.md",
-    //"postinstall": "npm run bundle"
+    "docs": "jsdoc2md -t docs/README.hbs src/*js > README.md"
   },
   "dependencies": {
     "babel-runtime": "^6.9.2"
