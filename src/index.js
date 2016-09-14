@@ -37,10 +37,13 @@ const perfNow = getTimeFunction();
 /**
  * Class computing the descriptors from accelerometer and gyroscope data.
  * <br />
+ * ```javascript
  * Example : <pre><code>
+ * // es6 :
  * import MotionFeatures from 'motion-features'; 
  * const mf = new MotionFeatures({ descriptors: ['accIntensity', 'kick'] });
  * </code></pre>
+ * ```
  * @class
  */
 class MotionFeatures {

@@ -26,10 +26,13 @@ this module is a work in progress, use at your own risk
 ## MotionFeatures
 Class computing the descriptors from accelerometer and gyroscope data.
 <br />
+```javascript
 Example : <pre><code>
+// es6 :
 import MotionFeatures from 'motion-features'; 
 const mf = new MotionFeatures({ descriptors: ['accIntensity', 'kick'] });
 </code></pre>
+```
 
 **Kind**: global class  
 
