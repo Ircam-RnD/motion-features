@@ -4,13 +4,13 @@ taking accelerometer and gyroscope sensors data as input.
 
 #### List of available descriptors :
 
-- accIntensity : gesture intensity computed from the accelerometers
-- gyrIntensity : gesture intensity computed from the gyroscopes
-- freefall : tell if the sensors are falling
-- kick : detects a hit gesture
-- shake : amount of shakiness of a gesture
-- spin : the global rotation speed
-- still : tell if the sensors are still
+- `accIntensity` : gesture intensity computed from the accelerometers
+- `gyrIntensity` : gesture intensity computed from the gyroscopes
+- `freefall` : tell if the sensors are falling
+- `kick` : detects a hit gesture
+- `shake` : amount of shakiness of a gesture
+- `spin` : the global rotation speed
+- `still` : tell if the sensors are still
 
 
 #### note :
