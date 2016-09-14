@@ -39,7 +39,7 @@ const perfNow = getTimeFunction();
  * <br />
  * Example : <pre><code>
  * import MotionFeatures from 'motion-features'; 
- * const mf = new MotionFeatures({ ['accIntensity', 'kick'] });
+ * const mf = new MotionFeatures({ descriptors: ['accIntensity', 'kick'] });
  * </code></pre>
  * @class
  */
