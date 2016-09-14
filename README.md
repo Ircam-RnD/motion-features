@@ -1,5 +1,5 @@
 # motion-features
-A monoclass library computing a variety of gestural descriptors,
+A monoclass library computing a customizable set of gestural descriptors,
 taking accelerometer and gyroscope sensors data as input.
 
 #### List of available descriptors :
@@ -26,12 +26,11 @@ this module is a work in progress, use at your own risk
 ## MotionFeatures
 Class computing the descriptors from accelerometer and gyroscope data.
 <br />
-```javascript
-Example : <pre><code>
+Example :
+```JavaScript
 // es6 :
 import MotionFeatures from 'motion-features'; 
 const mf = new MotionFeatures({ descriptors: ['accIntensity', 'kick'] });
-</code></pre>
 ```
 
 **Kind**: global class  
