@@ -31,11 +31,17 @@ function getTimeFunction() {
 const perfNow = getTimeFunction();
 
 /**
- *	Motion Features
- *	Class computing the descriptors from accelerometer and gyroscope data.
- * 	@class
+ * Class computing the descriptors from accelerometer and gyroscope data.
+ * Example : <pre><code>
+ * const mf = new MotionFeatures({ ['accIntensity', 'gyrIntensity', 'freefall', 'kick', 'shake', 'spin', 'still'] });
+ * </code></pre>
+ * @class
  */
 class MotionFeatures {
+
+	/**
+	 *	@param {Object.Array.String} descriptors - array of required descriptors
+ 	 */
 	constructor(options = {}) {
 		const defaults = {
 			descriptors: [
@@ -173,6 +179,9 @@ class MotionFeatures {
 		this.gyr[1] = y;
 		this.gyr[2] = z
 	}
+
+	/**
+	 * 
 
 	/**
 	 * update {descriptorsCallback}

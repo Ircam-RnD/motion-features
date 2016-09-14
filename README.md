@@ -24,15 +24,26 @@ this module is a work in progress, use at your own risk
 <a name="MotionFeatures"></a>
 
 ## MotionFeatures
-Motion Features
-	Class computing the descriptors from accelerometer and gyroscope data.
+Class computing the descriptors from accelerometer and gyroscope data.
+Example : <pre><code>
+const mf = new MotionFeatures({ ['accIntensity', 'gyrIntensity', 'freefall', 'kick', 'shake', 'spin', 'still'] });
+</code></pre>
 
 **Kind**: global class  
 
 * [MotionFeatures](#MotionFeatures)
+    * [new MotionFeatures(descriptors)](#new_MotionFeatures_new)
     * [.setAccelerometer()](#MotionFeatures+setAccelerometer)
     * [.setGyroscope()](#MotionFeatures+setGyroscope)
     * [.update()](#MotionFeatures+update)
+
+<a name="new_MotionFeatures_new"></a>
+
+### new MotionFeatures(descriptors)
+
+| Param | Type | Description |
+| --- | --- | --- |
+| descriptors | <code>Object.Array.String</code> | array of required descriptors |
 
 <a name="MotionFeatures+setAccelerometer"></a>
 
@@ -51,6 +62,7 @@ sets the current gyroscope values
 <a name="MotionFeatures+update"></a>
 
 ### motionFeatures.update()
+/**
 update {descriptorsCallback}
 triggers computing of the descriptors with the current sensor values and
 pass the results to a callback
