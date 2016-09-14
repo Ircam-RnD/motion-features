@@ -15,7 +15,7 @@
     "watch": "./bin/runner --watch",
     "serve": "./bin/runner --serve",
     "docs": "jsdoc2md -t docs/README.hbs src/*js > README.md",
-    "postinstall": "npm run bundle"
+    //"postinstall": "npm run bundle"
   },
   "dependencies": {
     "babel-runtime": "^6.9.2"
