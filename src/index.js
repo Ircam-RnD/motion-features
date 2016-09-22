@@ -1,5 +1,3 @@
-import f from './features';
-
 /**
  * Create a function that returns time in seconds according to the current
  * environnement (node or browser).
@@ -18,12 +16,12 @@ function getTimeFunction() {
   } else { // browser
     if (window.performance === 'undefined') {
       if (Date.now === 'undefined') {
-        return () => new Date.getTime();
+        return () => { return new Date.getTime() };
       } else {
-        return () => Date.now();
+        return () => { return Date.now() };
       }
     } else {
-      return () => window.performance.now();
+      return () => { return window.performance.now() };
     }
   }
 }
@@ -49,11 +47,19 @@ class MotionFeatures {
 
   /**
    * @param {Object} initObject - object containing an array of the
-   * required descriptors
+   * required descriptors and some variables used to compute the descriptors
+   * that you might want to change (for example if the browser is chrome you
+   * might want to set `gyrIsInDegrees` to false because it's the case on some
+   * versions, or you might want to change some thresholds).
+   * See the code for more details.
+   *
+   * @todo use typedef to describe the configuration parameters
    */
   constructor(options = {}) {
     const defaults = {
       descriptors: [
+        'accRaw',
+        'gyrRaw',
         'accIntensity',
         'gyrIntensity',
         'freefall',
@@ -61,12 +67,40 @@ class MotionFeatures {
         'shake',
         'spin',
         'still'
-      ]
+      ],
+
+      gyrIsInDegrees: true,
+
+      accIntensityParam1: 0.8,
+      accIntensityParam2: 0.1,
+
+      gyrIntensityParam1: 0.9,
+      gyrIntensityParam2: 1,
+
+      freefallAccThresh: 0.15,
+      freefallGyrThresh: 750,
+      freefallGyrDeltaThresh: 40,
+
+      kickThresh: 0.01,
+      kickSpeedGate: 200,
+      kickMedianFiltersize: 9,
+
+      shakeThresh: 0.1,
+      shakeWindowSize: 200,
+      shakeSlideFactor: 10,
+
+      spinThresh: 200,
+
+      stillThresh: 5000,
+      stillSlideFactor: 5,
     };
+
     this._params = Object.assign({}, defaults, options);
     //console.log(this._params.descriptors);
 
     this._methods = {
+      accRaw: this._updateAccRaw.bind(this),
+      gyrRaw: this._updateGyrRaw.bind(this),
       accIntensity: this._updateAccIntensity.bind(this),
       gyrIntensity: this._updateGyrIntensity.bind(this),
       freefall: this._updateFreefall.bind(this),
@@ -98,8 +132,8 @@ class MotionFeatures {
     this._gyrDelta = [0, 0, 0];
     this._gyrNorm = 0;
     this._gyrDeltaNorm = 0;
-    this._fallBegin = 0;
-    this._fallEnd = 0;
+    this._fallBegin = perfNow();
+    this._fallEnd = perfNow();
     this._fallDuration = 0;
     this._isFalling = false;
 
@@ -132,12 +166,12 @@ class MotionFeatures {
     //==================================================================== shake
     this._accDelta = [0, 0, 0];
     this._shakeWindow = [
-      new Array(f.shakeWindowSize),
-      new Array(f.shakeWindowSize),
-      new Array(f.shakeWindowSize)
+      new Array(this._params.shakeWindowSize),
+      new Array(this._params.shakeWindowSize),
+      new Array(this._params.shakeWindowSize)
     ];
     for (let i = 0; i < 3; i++) {
-      for (let j = 0; j < f.shakeWindowSize; j++) {
+      for (let j = 0; j < this._params.shakeWindowSize; j++) {
         this._shakeWindow[i][j] = 0;
       }
     }
@@ -147,8 +181,8 @@ class MotionFeatures {
     this._shaking = 0;
 
     //===================================================================== spin
-    this._spinBegin = 0;
-    this._spinEnd = 0;
+    this._spinBegin = perfNow();
+    this._spinEnd = perfNow();
     this._spinDuration = 0;
     this._isSpinning = false;
 
@@ -158,11 +192,11 @@ class MotionFeatures {
     this._stillSlidePrev = 0;
     this._isStill = false;
 
-    this._loopIndexPeriod = f.lcm(
-      f.lcm(
-        f.lcm(2, 3), f.kickMedianFiltersize
+    this._loopIndexPeriod = this._lcm(
+      this._lcm(
+        this._lcm(2, 3), this._params.kickMedianFiltersize
       ),
-      f.shakeWindowSize
+      this._params.shakeWindowSize
     );
     //console.log(this._loopIndexPeriod);
     this._loopIndex = 0;
@@ -179,7 +213,7 @@ class MotionFeatures {
   setAccelerometer(x, y, z) {
     this.acc[0] = x;
     this.acc[1] = y;
-    this.acc[2] = z
+    this.acc[2] = z;
   }
 
   /**
@@ -191,7 +225,12 @@ class MotionFeatures {
   setGyroscope(x, y, z) {
     this.gyr[0] = x;
     this.gyr[1] = y;
-    this.gyr[2] = z
+    this.gyr[2] = z;
+    if (this._params.gyrIsInDegrees) {
+      for (let i = 0; i < 3; i++) {
+        this.gyr[i] *= (2 * Math.PI / 360.);
+      }
+    }
   }
 
   /**
@@ -284,9 +323,9 @@ class MotionFeatures {
     // DEAL WITH this._elapsedTime
     this._elapsedTime = perfNow();
     // is this one used by several features ?
-    this._accNorm = f.magnitude3D(this.acc);
+    this._accNorm = this._magnitude3D(this.acc);
     // this one needs be here because used by freefall AND spin
-    this._gyrNorm = f.magnitude3D(this.gyr);
+    this._gyrNorm = this._magnitude3D(this.gyr);
     
     let err = null;
     let res = null;
@@ -310,6 +349,24 @@ class MotionFeatures {
   //====================== specific descriptors computing ====================//
   //==========================================================================//
 
+  /** @private */
+  _updateAccRaw(res) {
+    res.accRaw = {
+      x: this.acc[0],
+      y: this.acc[1],
+      z: this.acc[2]
+    };
+  }
+
+  /** @private */
+  _updateGyrRaw(res) {
+    res.gyrRaw = {
+      x: this.gyr[0],
+      y: this.gyr[1],
+      z: this.gyr[2]
+    };
+  }
+
   //============================================================== acc intensity
   /** @private */
   _updateAccIntensity(res) {
@@ -318,12 +375,12 @@ class MotionFeatures {
     for (let i = 0; i < 3; i++) {
       this._accLast[i][this._loopIndex % 3] = this.acc[i];
 
-      this._accIntensity[i] = f.intensity1D(
+      this._accIntensity[i] = this._intensity1D(
         this.acc[i],
         this._accLast[i][(this._loopIndex + 1) % 3],
         this._accIntensityLast[i][(this._loopIndex + 1) % 2],
-        f.accIntensityParam1,
-        f.accIntensityParam2,
+        this._params.accIntensityParam1,
+        this._params.accIntensityParam2,
         1
       );
 
@@ -348,12 +405,12 @@ class MotionFeatures {
     for (let i = 0; i < 3; i++) {
       this._gyrLast[i][this._loopIndex % 3] = this.gyr[i];
 
-      this._gyrIntensity[i] = f.intensity1D(
+      this._gyrIntensity[i] = this._intensity1D(
         this.gyr[i],
         this._gyrLast[i][(this._loopIndex + 1) % 3],
         this._gyrIntensityLast[i][(this._loopIndex + 1) % 2],
-        f.gyrIntensityParam1,
-        f.gyrIntensityParam2,
+        this._params.gyrIntensityParam1,
+        this._params.gyrIntensityParam2,
         1
       );
 
@@ -375,14 +432,14 @@ class MotionFeatures {
   _updateFreefall(res) {
     for (let i = 0; i < 3; i++) {
       this._gyrDelta[i] =
-        f.delta(this._gyrLast[i][(this._loopIndex + 1) % 3], this.gyr[i], 1);
+        this._delta(this._gyrLast[i][(this._loopIndex + 1) % 3], this.gyr[i], 1);
     }
 
-    this._gyrDeltaNorm = f.magnitude3D(this._gyrDelta);
+    this._gyrDeltaNorm = this._magnitude3D(this._gyrDelta);
 
-    if (this._accNorm < f.freefallAccThresh ||
-        (this._gyrNorm > f.freefallGyrThresh
-          && this._gyrDeltaNorm < f.freefallGyrDeltaThresh)) {
+    if (this._accNorm < this._params.freefallAccThresh ||
+        (this._gyrNorm > this._params.freefallGyrThresh
+          && this._gyrDeltaNorm < this._params.freefallGyrDeltaThresh)) {
       if (!this._isFalling) {
         this._isFalling = true;
         this._fallBegin = perfNow();
@@ -405,11 +462,11 @@ class MotionFeatures {
   //======================================================================= kick
   /** @private */
   _updateKick(res) {
-    this._i3 = this._loopIndex % f.kickMedianFiltersize;
+    this._i3 = this._loopIndex % this._params.kickMedianFiltersize;
     this._i1 = this._medianFifo[this._i3];
     this._i2 = 1;
 
-    if (this._i1 < f.kickMedianFiltersize &&
+    if (this._i1 < this._params.kickMedianFiltersize &&
         this._accIntensityNorm > this._medianValues[this._i1 + this._i2]) {
       // check right
       while (this._i1 + this._i2 < this.kickMedianFiltersize &&
@@ -443,7 +500,7 @@ class MotionFeatures {
     }
 
     // compare current intensity norm with previous median value
-    if (this._accIntensityNorm - this._accIntensityNormMedian > f.kickThresh) {
+    if (this._accIntensityNorm - this._accIntensityNormMedian > this._params.kickThresh) {
       if (this._isKicking) {
         if (this._kickIntensity < this._accIntensityNorm) {
           this._kickIntensity = this._accIntensityNorm;
@@ -454,12 +511,12 @@ class MotionFeatures {
         this._lastKick = this._elapsedTime;
       }
     } else {
-      if (this._elapsedTime - this._lastKick > f.kickSpeedGate) {
+      if (this._elapsedTime - this._lastKick > this._params.kickSpeedGate) {
         this._isKicking = false;
       }
     }
 
-    this._accIntensityNormMedian = this._medianValues[f.kickMedianFiltersize];
+    this._accIntensityNormMedian = this._medianValues[this._params.kickMedianFiltersize];
 
     res.kick = {
       intensity: this._kickIntensity,
@@ -471,7 +528,7 @@ class MotionFeatures {
   /** @private */
   _updateShake(res) {
     for (let i = 0; i < 3; i++) {
-      this._accDelta[i] = f.delta(
+      this._accDelta[i] = this._delta(
         this._accLast[i][(this._loopIndex + 1) % 3],
         this.acc[i],
         1
@@ -479,23 +536,23 @@ class MotionFeatures {
     }
 
     for (let i = 0; i < 3; i++) {
-      if (this._shakeWindow[i][this._loopIndex % f.shakeWindowSize]) {
+      if (this._shakeWindow[i][this._loopIndex % this._params.shakeWindowSize]) {
         this._shakeNb[i]--;
       }
-      if (this._accDelta[i] > f.shakeThresh) {
-        this._shakeWindow[i][this._loopIndex % f.shakeWindowSize] = 1;
+      if (this._accDelta[i] > this._params.shakeThresh) {
+        this._shakeWindow[i][this._loopIndex % this._params.shakeWindowSize] = 1;
         this._shakeNb[i]++;
       } else {
-        this._shakeWindow[i][this._loopIndex % f.shakeWindowSize] = 0;
+        this._shakeWindow[i][this._loopIndex % this._params.shakeWindowSize] = 0;
       }
     }
 
     this._shakingRaw =
-    f.magnitude3D(this._shakeNb) /
-    f.shakeWindowSize;
+    this._magnitude3D(this._shakeNb) /
+    this._params.shakeWindowSize;
     this._shakeSlidePrev = this._shaking;
     this._shaking =
-    f.slide(this._shakeSlidePrev, this._shakingRaw, f.shakeSlideFactor);
+    this._slide(this._shakeSlidePrev, this._shakingRaw, this._params.shakeSlideFactor);
 
     res.shake = {
       shaking: this._shaking
@@ -505,7 +562,7 @@ class MotionFeatures {
   //======================================================================= spin
   /** @private */
   _updateSpin(res) {
-    if (this._gyrNorm > f.spinThreshold) {
+    if (this._gyrNorm > this._params.spinThresh) {
       if (!this._isSpinning) {
         this._isSpinning = true;
         this._spinBegin = perfNow();
@@ -526,15 +583,15 @@ class MotionFeatures {
   //====================================================================== still
   /** @private */
   _updateStill(res) {
-    this._stillCrossProd = f.stillCrossProduct(this.gyr);
+    this._stillCrossProd = this._stillCrossProduct(this.gyr);
     this._stillSlidePrev = this._stillSlide;
-    this._stillSlide = f.slide(
+    this._stillSlide = this._slide(
       this._stillSlidePrev,
       this._stillCrossProd,
-      f.stillSlideFactor
+      this._params.stillSlideFactor
     );
 
-    if (this._stillSlide > f.stillThresh) {
+    if (this._stillSlide > this._params.stillThresh) {
       this._isStill = false;
     } else {
       this._isStill = true;
@@ -544,6 +601,54 @@ class MotionFeatures {
       still: this._isStill,
       slide: this._stillSlide
     }
+  }
+
+  //==========================================================================//
+  //================================ UTILITIES ===============================//
+  //==========================================================================//
+  /** @private */
+  _delta(prev, next, dt) {
+    return (next - prev) / (2 * dt);
+  }
+
+  /** @private */
+  _intensity1D(nextX, prevX, prevIntensity, param1, param2, dt) {
+    const dx = this._delta(nextX, prevX, dt);//(nextX - prevX) / (2 * dt);
+    return param2 * dx * dx + param1 * prevIntensity;
+  }
+
+  /** @private */
+  _magnitude3D(xyzArray) {
+    return Math.sqrt(xyzArray[0] * xyzArray[0] + 
+                xyzArray[1] * xyzArray[1] +
+                xyzArray[2] * xyzArray[2]);
+  }
+
+  /** @private */
+  _lcm(a, b) {
+    let a1 = a, b1 = b;
+
+    while (a1 != b1) {
+      if (a1 < b1) {
+        a1 += a;
+      } else {
+        b1 += b;
+      }
+    }
+
+    return a1;
+  }
+
+  /** @private */
+  _slide(prevSlide, currentVal, slideFactor) {
+    return prevSlide + (currentVal - prevSlide) / slideFactor;
+  }
+
+  /** @private */
+  _stillCrossProduct(xyzArray) {
+    return (xyzArray[1] - xyzArray[2]) * (xyzArray[1] - xyzArray[2]) +
+           (xyzArray[0] - xyzArray[1]) * (xyzArray[0] - xyzArray[1]) +
+           (xyzArray[2] - xyzArray[0]) * (xyzArray[2] - xyzArray[0]);
   }
 }
 

@@ -47,7 +47,7 @@ const mf = new MotionFeatures({ descriptors: ['accIntensity', 'kick'] });
 
 | Param | Type | Description |
 | --- | --- | --- |
-| initObject | <code>Object</code> | object containing an array of the required descriptors |
+| initObject | <code>Object</code> | object containing an array of the required descriptors and some variables used to compute the descriptors that you might want to change (for example if the browser is chrome you might want to set `gyrIsInDegrees` to false because it's the case on some versions, or you might want to change some thresholds). See the code for more details. |
 
 <a name="MotionFeatures+setAccelerometer"></a>
 
