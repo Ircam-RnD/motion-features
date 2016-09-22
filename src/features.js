@@ -5,12 +5,12 @@ const features = {
   accIntensityParam1: 0.8,
   accIntensityParam2: 0.1,
 
+  gyrIntensityParam1: 0.9,
+  gyrIntensityParam2: 1,
+
   freefallAccThresh: 0.15,
   freefallGyrThresh: 750,
   freefallGyrDeltaThresh: 40,
-
-  gyrIntensityParam1: 0.9,
-  gyrIntensityParam2: 1,
 
   kickThresh: 0.01,
   kickSpeedGate: 200,

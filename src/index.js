@@ -164,6 +164,7 @@ class MotionFeatures {
       ),
       f.shakeWindowSize
     );
+    //console.log(this._loopIndexPeriod);
     this._loopIndex = 0;
   }
 
@@ -282,6 +283,10 @@ class MotionFeatures {
   update(callback) {
     // DEAL WITH this._elapsedTime
     this._elapsedTime = perfNow();
+    // is this one used by several features ?
+    this._accNorm = f.magnitude3D(this.acc);
+    // this one needs be here because used by freefall AND spin
+    this._gyrNorm = f.magnitude3D(this.gyr);
     
     let err = null;
     let res = null;
@@ -298,6 +303,7 @@ class MotionFeatures {
     callback(err, res);
 
     this._loopIndex = (this._loopIndex + 1) % this._loopIndexPeriod;
+    //console.log(this._loopIndex);
   }
 
   //==========================================================================//
@@ -320,6 +326,8 @@ class MotionFeatures {
         f.accIntensityParam2,
         1
       );
+
+      this._accIntensityLast[i][this._loopIndex % 2] = this._accIntensity[i];
 
       this._accIntensityNorm += this._accIntensity[i];
     }
@@ -349,6 +357,8 @@ class MotionFeatures {
         1
       );
 
+      this._gyrIntensityLast[i][this._loopIndex % 2] = this._gyrIntensity[i];
+
       this._gyrIntensityNorm += this._gyrIntensity[i];
     }
 
@@ -363,9 +373,6 @@ class MotionFeatures {
   //=================================================================== freefall
   /** @private */
   _updateFreefall(res) {
-    this._accNorm = f.magnitude3D(this.acc);
-    this._gyrNorm = f.magnitude3D(this.gyr);
-
     for (let i = 0; i < 3; i++) {
       this._gyrDelta[i] =
         f.delta(this._gyrLast[i][(this._loopIndex + 1) % 3], this.gyr[i], 1);
