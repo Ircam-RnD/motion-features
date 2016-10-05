@@ -70,11 +70,6 @@ var log = {
   deleteFile: function(filename) {
     var msg = prefix + '%s: successfully removed'.yellow;
     console.log(msg, toRel(filename));
-  },
-
-  serverStart: function(port) {
-    var msg = prefix + 'server listen on http://127.0.0.1:%s'.blue;
-    console.log(msg, port);
   }
 };
 

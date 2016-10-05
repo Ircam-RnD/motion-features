@@ -6,7 +6,6 @@ var pkg = require('../package.json');
 var util = require('util');
 
 var javascripts = require('./javascripts');
-var server = require('./server');
 var cwd = process.cwd();
 
 'use strict';
@@ -14,8 +13,11 @@ var cwd = process.cwd();
 /**
  * Options for babel transpiling.
  */
-var babelrc = fse.readFileSync(path.join(cwd, '.babelrc'));
-var babelOptions = JSON.parse(babelrc.toString());
+var babelOptions = {
+  sourceMap: 'inline',
+  presets: ['es2015'],
+  plugins: ['transform-runtime', 'transform-es2015-modules-commonjs'],
+};
 
 /**
  * Options for watch.
@@ -42,7 +44,8 @@ var browserifyOptions = {
 var srcDirectory = path.join(cwd, 'src');
 var distDirectory = path.join(cwd, 'dist');
 
-var bundlePath = path.join(cwd, 'bundle.js');
+var umdTarget = path.join(cwd, pkg.name + '.umd.js');
+var minTarget = path.join(cwd, pkg.name + '.min.js');
 
 /**
  * Define which file should be ignored by every command.
@@ -96,9 +99,9 @@ function _getFileList(folder, callback) {
  * Watch javascript source files.
  */
 function watchFiles(srcDirectory, distDirectory) {
-  var transpiler = javascripts.getTranspiler(srcDirectory, distDirectory, isAllowed, babelOptions, browserifyOptions);
-
   watch.createMonitor(srcDirectory, watchOptions, function(monitor) {
+    var transpiler = javascripts.getTranspiler(srcDirectory, distDirectory, isAllowed, babelOptions);
+
     monitor.on('created', function(filename, stats) {
       if (isAllowed(filename))
         transpiler.transpile(filename, []);
@@ -114,11 +117,6 @@ function watchFiles(srcDirectory, distDirectory) {
         transpiler.delete(filename);
     });
   });
-
-  // start a server which bundles sources on `bundle.js` request
-  var entryPoint = path.join(distDirectory, 'index.js');
-  var middleware = server.bundleMiddleware(transpiler, entryPoint, bundlePath);
-  server.start(middleware);
 }
 
 
@@ -134,13 +132,12 @@ function bundle(distDirectory) {
   var transpiler = javascripts.getTranspiler(srcDirectory, distDirectory, isAllowed, babelOptions, browserifyOptions);
 
   transpileFiles(srcDirectory, distDirectory, function() {
-    transpiler.bundle(entryPoint, bundlePath);
+    transpiler.bundle(entryPoint, umdTarget, function() {
+      transpiler.uglify(umdTarget, minTarget);
+    });
   });
 }
 
-function serve() {
-  server.start();
-}
 
 /* --------------------------------------------------------------------------
  * Process and execute the given command.
@@ -169,17 +166,10 @@ switch (command) {
     break;
 
   /**
-   * Transpile all files in `src` from es6 to es5 and browserify all the things.
+   * Transpile all files in `src` from es6 to es5.
    */
   case '--bundle':
     bundle(distDirectory);
-    break;
-
-  /**
-   * Run a static server.
-   */
-  case '--serve':
-    serve();
     break;
 }
 

@@ -4,6 +4,7 @@ var browserify = require('browserify');
 var fse = require('fs-extra');
 var log = require('./log');
 var path = require('path');
+var uglify = require('uglify-js');
 
 'use strict';
 
@@ -94,6 +95,22 @@ function getTranspiler(srcDirectory, distDirectory, isAllowed, babelOptions, bro
       writeStream.on('finish', function() {
         if (callback)
           callback();
+      });
+    },
+
+    /**
+     * Uglify the `inFilename` into `outFilename`.
+     */
+    uglify: function(inFilename, outFilename) {
+      var result = uglify.minify(inFilename);
+      var startTime = new Date().getTime();
+
+
+      fse.outputFile(outFilename, result.code, function(err) {
+        if (err)
+          return console.error(err.message);
+
+        log.uglifySuccess(inFilename, outFilename, startTime);
       });
     },
 
