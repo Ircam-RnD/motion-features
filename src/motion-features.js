@@ -667,4 +667,4 @@ class MotionFeatures {
   }
 }
 
-export default MotionFeatures
+export default MotionFeatures;
