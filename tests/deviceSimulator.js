@@ -1,6 +1,6 @@
 //==================== Quick & dirty node test : =====================//
 
-var MotionFeatures = require('../dist/index').default;
+var MotionFeatures = require('../dist/index').MotionFeatures;
 //import MotionFeatures from '../dist/index';
 
 //*

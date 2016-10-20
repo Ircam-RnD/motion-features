@@ -12,10 +12,9 @@ taking accelerometer and gyroscope sensors data as input.
 - `spin` : the global rotation speed
 - `still` : tell if the sensors are still
 
-
 #### note :
 
-this module is a work in progress, use at your own risk
+this module is still a work in progress.
 
 <hr>
 
@@ -28,9 +27,25 @@ Class computing the descriptors from accelerometer and gyroscope data.
 <br />
 Example :
 ```JavaScript
-// es6 :
-import MotionFeatures from 'motion-features'; 
+// es6 with browserify :
+import { MotionFeatures } from 'motion-features'; 
 const mf = new MotionFeatures({ descriptors: ['accIntensity', 'kick'] });
+
+// es5 with browserify :
+var motionFeatures = require('motion-features');
+var mf = new motionFeatures.MotionFeatures({ descriptors: ['accIntensity', 'kick'] });
+
+// loading from a "script" tag :
+var mf = new motionFeatures.MotionFeatures({ descriptors: ['accIntensity', 'kick'] });
+
+// then, on each motion event :
+mf.setAccelerometer(x, y, z);
+mf.setGyroscopes(alpha, beta, theta);
+mf.update(function(err, res) {
+  if (err === null) {
+    // do something with res
+  }
+});
 ```
 
 **Kind**: global class  
@@ -85,7 +100,7 @@ pass the results to a callback
 
 | Param | Type | Description |
 | --- | --- | --- |
-| callback | <code>descriptorsCallback</code> | the callback handling the last computed descriptors |
+| callback | <code>[featuresCallback](#featuresCallback)</code> | the callback handling the last computed descriptors |
 
 <hr>
 <a name="accIntensity"></a>
@@ -191,10 +206,10 @@ Information about the stillness of the sensor.
 | slide | <code>Number</code> | the original value thresholded to determine stillness. |
 
 <hr>
-<a name="descriptors"></a>
+<a name="features"></a>
 
-## descriptors : <code>Object</code>
-Computed descriptors.
+## features : <code>Object</code>
+Computed features.
 
 **Kind**: global typedef  
 **Properties**
@@ -213,13 +228,13 @@ Computed descriptors.
 <a name="featuresCallback"></a>
 
 ## featuresCallback : <code>function</code>
-Callback handling the descriptors.
+Callback handling the features.
 
 **Kind**: global typedef  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | err | <code>String</code> | Description of a potential error. |
-| res | <code>[descriptors](#descriptors)</code> | Object holding the descriptor values. |
+| res | <code>[features](#features)</code> | Object holding the feature values. |
 
 <hr>
