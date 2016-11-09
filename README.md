@@ -54,7 +54,7 @@ mf.update(function(err, res) {
     * [new MotionFeatures(initObject)](#new_MotionFeatures_new)
     * [.setAccelerometer(x, y, z)](#MotionFeatures+setAccelerometer)
     * [.setGyroscope(x, y, z)](#MotionFeatures+setGyroscope)
-    * [.update(callback)](#MotionFeatures+update)
+    * [.update([callback])](#MotionFeatures+update) ⇒ <code>[features](#features)</code>
 
 <a name="new_MotionFeatures_new"></a>
 
@@ -92,15 +92,16 @@ Sets the current gyroscope values.
 
 <a name="MotionFeatures+update"></a>
 
-### motionFeatures.update(callback)
-triggers computation of the descriptors from the current sensor values and
+### motionFeatures.update([callback]) ⇒ <code>[features](#features)</code>
+Triggers computation of the descriptors from the current sensor values and
 pass the results to a callback
 
 **Kind**: instance method of <code>[MotionFeatures](#MotionFeatures)</code>  
+**Returns**: <code>[features](#features)</code> - features - Return these computed descriptors anyway  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| callback | <code>[featuresCallback](#featuresCallback)</code> | the callback handling the last computed descriptors |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [callback] | <code>[featuresCallback](#featuresCallback)</code> | <code></code> | The callback handling the last computed descriptors |
 
 <hr>
 <a name="accIntensity"></a>

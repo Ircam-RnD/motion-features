@@ -331,11 +331,12 @@ class MotionFeatures {
    */
 
   /**
-   * triggers computation of the descriptors from the current sensor values and
+   * Triggers computation of the descriptors from the current sensor values and
    * pass the results to a callback
-   * @param {featuresCallback} callback - the callback handling the last computed descriptors
+   * @param {featuresCallback} [callback=null] - The callback handling the last computed descriptors
+   * @returns {features} features - Return these computed descriptors anyway
    */
-  update(callback) {
+  update(callback = null) {
     // DEAL WITH this._elapsedTime
     this._elapsedTime = perfNow();
     // is this one used by several features ?
@@ -355,9 +356,13 @@ class MotionFeatures {
     } catch (e) {
       err = e;
     }
-    callback(err, res);
 
     this._loopIndex = (this._loopIndex + 1) % this._loopIndexPeriod;
+
+    if (callback) {
+      callback(err, res);  
+    }
+    return res;
   }
 
   //==========================================================================//
