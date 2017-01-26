@@ -50,7 +50,7 @@ const perfNow = getTimeFunction();
  *
  * // then, on each motion event :
  * mf.setAccelerometer(x, y, z);
- * mf.setGyroscopes(alpha, beta, theta);
+ * mf.setGyroscope(alpha, beta, theta);
  * mf.update(function(err, res) {
  *   if (err === null) {
  *     // do something with res
@@ -100,6 +100,7 @@ class MotionFeatures {
       kickThresh: 0.01,
       kickSpeedGate: 200,
       kickMedianFiltersize: 9,
+      kickCallback: null,
 
       shakeThresh: 0.1,
       shakeWindowSize: 200,
@@ -109,6 +110,7 @@ class MotionFeatures {
 
       stillThresh: 5000,
       stillSlideFactor: 5,
+
     };
 
     this._params = Object.assign({}, defaults, options);
@@ -125,6 +127,8 @@ class MotionFeatures {
       spin: this._updateSpin.bind(this),
       still: this._updateStill.bind(this)
     };
+
+    this._kickCallback = this._params.kickCallback;
 
     this.acc = [0, 0, 0];
     this.gyr = [0, 0, 0];
@@ -221,12 +225,22 @@ class MotionFeatures {
   //========== interface =========//
 
   /**
-   * sSets the current accelerometer values.
+   * Update configuration params (except descriptors list)
+   * @param {Object} params - a subset of the constructor's params
+   */
+  updateParams(params = {}) {
+    for (let key in params) {
+      this._params[key] = params[key];
+    }
+  }
+
+  /**
+   * Sets the current accelerometer values.
    * @param {Number} x - the accelerometer's x value
    * @param {Number} y - the accelerometer's y value
    * @param {Number} z - the accelerometer's z value
    */
-  setAccelerometer(x, y, z) {
+  setAccelerometer(x, y = 0, z = 0) {
     this.acc[0] = x;
     this.acc[1] = y;
     this.acc[2] = z;
@@ -238,7 +252,7 @@ class MotionFeatures {
    * @param {Number} y - the gyroscope's y value
    * @param {Number} z - the gyroscope's z value
    */
-  setGyroscope(x, y, z) {
+  setGyroscope(x, y = 0, z = 0) {
     this.gyr[0] = x;
     this.gyr[1] = y;
     this.gyr[2] = z;
@@ -333,7 +347,7 @@ class MotionFeatures {
   /**
    * Triggers computation of the descriptors from the current sensor values and
    * pass the results to a callback
-   * @param {featuresCallback} [callback=null] - The callback handling the last computed descriptors
+   * @param {featuresCallback} callback - The callback handling the last computed descriptors
    * @returns {features} features - Return these computed descriptors anyway
    */
   update(callback = null) {
@@ -486,7 +500,7 @@ class MotionFeatures {
     this._i1 = this._medianFifo[this._i3];
     this._i2 = 1;
 
-    if (this._i1 < this._params.kickMedianFiltersize &&
+    if (this._i1 < this._params.kickMedianFiltersize - 1 &&
         this._accIntensityNorm > this._medianValues[this._i1 + this._i2]) {
       // check right
       while (this._i1 + this._i2 < this.kickMedianFiltersize &&
@@ -525,18 +539,27 @@ class MotionFeatures {
         if (this._kickIntensity < this._accIntensityNorm) {
           this._kickIntensity = this._accIntensityNorm;
         }
+        if (this._kickCallback) {
+          this._kickCallback({ state: 'middle', intensity: this._kickIntensity });
+        }
       } else {
         this._isKicking = true;
         this._kickIntensity = this._accIntensityNorm;
         this._lastKick = this._elapsedTime;
+        if (this._kickCallback) {
+          this._kickCallback({ state: 'start', intensity: this._kickIntensity });
+        }
       }
     } else {
       if (this._elapsedTime - this._lastKick > this._params.kickSpeedGate) {
+        if (this._isKicking && this._kickCallback) {
+          this._kickCallback({ state: 'stop', intensity: this._kickIntensity });
+        }
         this._isKicking = false;
       }
     }
 
-    this._accIntensityNormMedian = this._medianValues[this._params.kickMedianFiltersize];
+    this._accIntensityNormMedian = this._medianValues[Math.ceil(this._params.kickMedianFiltersize * 0.5)];
 
     res.kick = {
       intensity: this._kickIntensity,

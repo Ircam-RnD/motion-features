@@ -4,17 +4,21 @@ taking accelerometer and gyroscope sensors data as input.
 
 #### List of available descriptors :
 
-- `accIntensity` : gesture intensity computed from the accelerometers
-- `gyrIntensity` : gesture intensity computed from the gyroscopes
-- `freefall` : tell if the sensors are falling
+computed from accelerometer only :
+
+- `accIntensity` : gesture intensity computed from the accelerometer
 - `kick` : detects a hit gesture
 - `shake` : amount of shakiness of a gesture
+
+computed from gyroscope only :
+
+- `gyrIntensity` : gesture intensity computed from the gyroscope
 - `spin` : the global rotation speed
 - `still` : tell if the sensors are still
 
-#### note :
+computed from both accelerometer and gyroscope :
 
-this module is still a work in progress.
+- `freefall` : tell if the sensors are falling
 
 <hr>
 
@@ -40,7 +44,7 @@ var mf = new motionFeatures.MotionFeatures({ descriptors: ['accIntensity', 'kick
 
 // then, on each motion event :
 mf.setAccelerometer(x, y, z);
-mf.setGyroscopes(alpha, beta, theta);
+mf.setGyroscope(alpha, beta, theta);
 mf.update(function(err, res) {
   if (err === null) {
     // do something with res
@@ -52,9 +56,10 @@ mf.update(function(err, res) {
 
 * [MotionFeatures](#MotionFeatures)
     * [new MotionFeatures(initObject)](#new_MotionFeatures_new)
+    * [.updateParams(params)](#MotionFeatures+updateParams)
     * [.setAccelerometer(x, y, z)](#MotionFeatures+setAccelerometer)
     * [.setGyroscope(x, y, z)](#MotionFeatures+setGyroscope)
-    * [.update([callback])](#MotionFeatures+update) ⇒ <code>[features](#features)</code>
+    * [.update(callback)](#MotionFeatures+update) ⇒ <code>[features](#features)</code>
 
 <a name="new_MotionFeatures_new"></a>
 
@@ -64,18 +69,29 @@ mf.update(function(err, res) {
 | --- | --- | --- |
 | initObject | <code>Object</code> | object containing an array of the required descriptors and some variables used to compute the descriptors that you might want to change (for example if the browser is chrome you might want to set `gyrIsInDegrees` to false because it's the case on some versions, or you might want to change some thresholds). See the code for more details. |
 
-<a name="MotionFeatures+setAccelerometer"></a>
+<a name="MotionFeatures+updateParams"></a>
 
-### motionFeatures.setAccelerometer(x, y, z)
-sSets the current accelerometer values.
+### motionFeatures.updateParams(params)
+Update configuration params (except descriptors list)
 
 **Kind**: instance method of <code>[MotionFeatures](#MotionFeatures)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| x | <code>Number</code> | the accelerometer's x value |
-| y | <code>Number</code> | the accelerometer's y value |
-| z | <code>Number</code> | the accelerometer's z value |
+| params | <code>Object</code> | a subset of the constructor's params |
+
+<a name="MotionFeatures+setAccelerometer"></a>
+
+### motionFeatures.setAccelerometer(x, y, z)
+Sets the current accelerometer values.
+
+**Kind**: instance method of <code>[MotionFeatures](#MotionFeatures)</code>  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| x | <code>Number</code> |  | the accelerometer's x value |
+| y | <code>Number</code> | <code>0</code> | the accelerometer's y value |
+| z | <code>Number</code> | <code>0</code> | the accelerometer's z value |
 
 <a name="MotionFeatures+setGyroscope"></a>
 
@@ -84,15 +100,15 @@ Sets the current gyroscope values.
 
 **Kind**: instance method of <code>[MotionFeatures](#MotionFeatures)</code>  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| x | <code>Number</code> | the gyroscope's x value |
-| y | <code>Number</code> | the gyroscope's y value |
-| z | <code>Number</code> | the gyroscope's z value |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| x | <code>Number</code> |  | the gyroscope's x value |
+| y | <code>Number</code> | <code>0</code> | the gyroscope's y value |
+| z | <code>Number</code> | <code>0</code> | the gyroscope's z value |
 
 <a name="MotionFeatures+update"></a>
 
-### motionFeatures.update([callback]) ⇒ <code>[features](#features)</code>
+### motionFeatures.update(callback) ⇒ <code>[features](#features)</code>
 Triggers computation of the descriptors from the current sensor values and
 pass the results to a callback
 
@@ -101,7 +117,7 @@ pass the results to a callback
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| [callback] | <code>[featuresCallback](#featuresCallback)</code> | <code></code> | The callback handling the last computed descriptors |
+| callback | <code>[featuresCallback](#featuresCallback)</code> | <code></code> | The callback handling the last computed descriptors |
 
 <hr>
 <a name="accIntensity"></a>
