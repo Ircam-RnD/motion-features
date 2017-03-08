@@ -10,6 +10,6 @@ var loopFunction = function() {
 	mf.setGyroscope(0, 0, 0);
 	mf.update((err, res) => { console.log(res); })
 };
-setInterval(loopFunction, 10);
+//setInterval(loopFunction, 10);
 //*/
 

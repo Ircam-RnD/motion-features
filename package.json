@@ -17,7 +17,8 @@
     "bundle": "node ./bin/runner --bundle",
     "transpile": "node ./bin/runner --transpile",
     "watch": "node ./bin/runner --watch",
-    "docs": "jsdoc2md -t docs/README.hbs src/*js > README.md"
+    "docs": "jsdoc2md -t docs/README.hbs src/*js > README.md",
+    "tests": "babel-tape-runner \"tests/*.js\""
   },
   "babel": {
     "presets": [
@@ -33,16 +34,15 @@
     "babel-plugin-transform-runtime": "^6.12.0",
     "babel-preset-es2015": "^6.16.0",
     "babel-preset-latest": "^6.14.0",
+    "babel-tape-runner": "^2.0.1",
     "benchmark": "^1.0.0",
     "browserify": "^13.0.0",
     "colors": "^1.1.2",
-    "connect": "^3.3.5",
     "fs-extra": "^0.26.5",
     "jsdoc-to-markdown": "^1.3.7",
     "ora": "^0.2.0",
     "portfinder": "^0.4.0",
-    "serve-favicon": "^2.2.0",
-    "serve-static": "^1.9.2",
+    "tape": "^4.6.0",
     "uglify-js": "^2.7.3",
     "watch": "^0.17.1"
   }
