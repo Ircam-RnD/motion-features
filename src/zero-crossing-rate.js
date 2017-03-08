@@ -1,3 +1,5 @@
+/** @todo : add integrated buffer here for optimized statistics computing */
+
 const defaults = {
   noiseThreshold: 0.1
 };
@@ -32,6 +34,7 @@ class ZeroCrossingRate {
     // TODO: improve this (2.0 is empirical factor because we don't know a priori sensor range)
     this.amplitude = this.stdDev * 2.0;
 
+    console.log(this.crossings.length);
     // not used anymore (remove ?)
     // this.frequency = Math.sqrt(this.crossings.length * 2.0 / this.inputFrame.length); // sqrt'ed normalized by nyquist freq
 
@@ -39,7 +42,7 @@ class ZeroCrossingRate {
     // this.frequency = this.crossings.length * 2.0 / this.inputFrame.length; // normalized by nyquist freq
 
     // this one is working with two direction crossings detection version
-    this.frequency = this.crossings.length / (this.inputFrame.length - 1);
+    this.frequency = this.crossings.length / (this.inputFrame.length - 1); // beware of division by zero
     
     if(this.crossings.length > 2) {
       //let clip = this.periodStdDev * 5 / this.inputFrame.length;
@@ -53,11 +56,6 @@ class ZeroCrossingRate {
       this.periodicity = 0;
     }
 
-    // TODO : improve periodicity algorithm !!!
-    // this.outFrame[0] = this.amplitude;
-    // this.outFrame[1] = this.frequency;
-    // this.outFrame[2] = this.periodicity;
-    // this.output();
     return {
       amplitude: this.amplitude,
       frequency: this.frequency,
@@ -112,18 +110,19 @@ class ZeroCrossingRate {
 
     // compute mean of delta-T between crossings
     this.periodMean = 0;
-    for(let i=1; i<this.crossings.length; i++) {
+    for (let i = 1; i < this.crossings.length; i++) {
       this.periodMean += this.crossings[i] - this.crossings[i - 1];
     }
+    // if we have a NaN here we don't care as we won't use this.periodMean below
     this.periodMean /= (this.crossings.length - 1);
 
     // compute stdDev of delta-T between crossings
     this.periodStdDev = 0;
-    for(let i=1; i<this.crossings.length; i++) {
+    for (let i = 1; i < this.crossings.length; i++) {
       let deltaP = (this.crossings[i] - this.crossings[i - 1] - this.periodMean)
       this.periodStdDev += deltaP * deltaP;
     }
-    if(this.crossings.length > 2) {
+    if (this.crossings.length > 2) {
       this.periodStdDev = Math.sqrt(this.periodStdDev / (this.crossings.length - 2));
     }
   }

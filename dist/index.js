@@ -13,5 +13,14 @@ Object.defineProperty(exports, 'MotionFeatures', {
   }
 });
 
+var _zeroCrossingRate = require('./zero-crossing-rate');
+
+Object.defineProperty(exports, 'ZeroCrossingRate', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_zeroCrossingRate).default;
+  }
+});
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImluZGV4LmpzIl0sIm5hbWVzIjpbImRlZmF1bHQiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7O21EQUFTQSxPIiwiZmlsZSI6ImluZGV4LmpzIiwic291cmNlc0NvbnRlbnQiOlsiZXhwb3J0IHsgZGVmYXVsdCBhcyBNb3Rpb25GZWF0dXJlcyB9IGZyb20gJy4vbW90aW9uLWZlYXR1cmVzJzsiXX0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImluZGV4LmpzIl0sIm5hbWVzIjpbImRlZmF1bHQiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7O21EQUFTQSxPOzs7Ozs7Ozs7cURBQ0FBLE8iLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VzQ29udGVudCI6WyJleHBvcnQgeyBkZWZhdWx0IGFzIE1vdGlvbkZlYXR1cmVzIH0gZnJvbSAnLi9tb3Rpb24tZmVhdHVyZXMnO1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBaZXJvQ3Jvc3NpbmdSYXRlIH0gZnJvbSAnLi96ZXJvLWNyb3NzaW5nLXJhdGUnOyJdfQ==

@@ -32,25 +32,27 @@ const perfNow = getTimeFunction();
  * @todo typedef constructor argument
  */
 
-/**
- * Class computing the descriptors from accelerometer and gyroscope data.
- * <br />
- * Example :
- * ```JavaScript
- * // es6 with browserify :
- * import { MotionFeatures } from 'motion-features'; 
- * const mf = new MotionFeatures({ descriptors: ['accIntensity', 'kick'] });
- *
+/*
  * // es5 with browserify :
  * var motionFeatures = require('motion-features');
  * var mf = new motionFeatures.MotionFeatures({ descriptors: ['accIntensity', 'kick'] });
  *
  * // loading from a "script" tag :
  * var mf = new motionFeatures.MotionFeatures({ descriptors: ['accIntensity', 'kick'] });
+ */
+
+
+/**
+ * Class computing the descriptors from accelerometer and gyroscope data.
+ * <br />
+ * es6 + browserify example :
+ * ```JavaScript
+ * import { MotionFeatures } from 'motion-features'; 
+ * const mf = new MotionFeatures({ descriptors: ['accIntensity', 'kick'] });
  *
  * // then, on each motion event :
  * mf.setAccelerometer(x, y, z);
- * mf.setGyroscope(alpha, beta, theta);
+ * mf.setGyroscope(alpha, beta, gamma);
  * mf.update(function(err, res) {
  *   if (err === null) {
  *     // do something with res
@@ -225,12 +227,14 @@ class MotionFeatures {
   //========== interface =========//
 
   /**
-   * Update configuration params (except descriptors list)
-   * @param {Object} params - a subset of the constructor's params
+   * Update configuration parameters (except descriptors list)
+   * @param {Object} params - a subset of the constructor's parameters
    */
   updateParams(params = {}) {
     for (let key in params) {
-      this._params[key] = params[key];
+      if (key !== 'descriptors') {
+        this._params[key] = params[key];
+      }
     }
   }
 
@@ -692,6 +696,12 @@ class MotionFeatures {
     return (xyzArray[1] - xyzArray[2]) * (xyzArray[1] - xyzArray[2]) +
            (xyzArray[0] - xyzArray[1]) * (xyzArray[0] - xyzArray[1]) +
            (xyzArray[2] - xyzArray[0]) * (xyzArray[2] - xyzArray[0]);
+  }
+
+  _zeroCrossingRate(val) {
+    let power, frequency, periodicity;
+    
+    return [ power, frequency, periodicity ];
   }
 }
 

@@ -29,22 +29,14 @@ computed from both accelerometer and gyroscope :
 ## MotionFeatures
 Class computing the descriptors from accelerometer and gyroscope data.
 <br />
-Example :
+es6 + browserify example :
 ```JavaScript
-// es6 with browserify :
 import { MotionFeatures } from 'motion-features'; 
 const mf = new MotionFeatures({ descriptors: ['accIntensity', 'kick'] });
 
-// es5 with browserify :
-var motionFeatures = require('motion-features');
-var mf = new motionFeatures.MotionFeatures({ descriptors: ['accIntensity', 'kick'] });
-
-// loading from a "script" tag :
-var mf = new motionFeatures.MotionFeatures({ descriptors: ['accIntensity', 'kick'] });
-
 // then, on each motion event :
 mf.setAccelerometer(x, y, z);
-mf.setGyroscope(alpha, beta, theta);
+mf.setGyroscope(alpha, beta, gamma);
 mf.update(function(err, res) {
   if (err === null) {
     // do something with res
@@ -72,13 +64,13 @@ mf.update(function(err, res) {
 <a name="MotionFeatures+updateParams"></a>
 
 ### motionFeatures.updateParams(params)
-Update configuration params (except descriptors list)
+Update configuration parameters (except descriptors list)
 
 **Kind**: instance method of <code>[MotionFeatures](#MotionFeatures)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| params | <code>Object</code> | a subset of the constructor's params |
+| params | <code>Object</code> | a subset of the constructor's parameters |
 
 <a name="MotionFeatures+setAccelerometer"></a>
 

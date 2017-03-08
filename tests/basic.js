@@ -32,5 +32,8 @@ test('zero crossing rate', (t) => {
   crossings = zcr.process([ 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, -1 ]);
   //console.log(JSON.stringify(crossings));
 
+  crossings = zcr.process([ 1, 0, 0, 0, 0, 0 ]);
+  console.log(JSON.stringify(crossings));
+
   t.end();
 });
