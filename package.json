@@ -1,6 +1,6 @@
 {
   "name": "motion-features",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "gesture descriptors processing class",
   "main": "dist/index.js",
   "license": "GPL-3.0",

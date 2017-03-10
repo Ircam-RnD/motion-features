@@ -1,3 +1,5 @@
+import ZeroCrossingRate from './zero-crossing-rate';
+
 /**
  * Create a function that returns time in seconds according to the current
  * environnement (node or browser).
@@ -84,7 +86,9 @@ class MotionFeatures {
         'kick',
         'shake',
         'spin',
-        'still'
+        'still',
+        'gyrZcr',
+        'accZcr'
       ],
 
       gyrIsInDegrees: true,
@@ -113,6 +117,13 @@ class MotionFeatures {
       stillThresh: 5000,
       stillSlideFactor: 5,
 
+      gyrZcrNoiseThresh: 0.01,
+      gyrZcrFrameSize: 100,
+      gyrZcrHopSize: 10,
+
+      accZcrNoiseThresh: 0.01,
+      accZcrFrameSize: 100,
+      accZcrHopSize: 10,
     };
 
     this._params = Object.assign({}, defaults, options);
@@ -127,7 +138,9 @@ class MotionFeatures {
       kick: this._updateKick.bind(this),
       shake: this._updateShake.bind(this),
       spin: this._updateSpin.bind(this),
-      still: this._updateStill.bind(this)
+      still: this._updateStill.bind(this),
+      gyrZcr: this._updateGyrZcr.bind(this),
+      accZcr: this._updateAccZcr.bind(this)
     };
 
     this._kickCallback = this._params.kickCallback;
@@ -222,6 +235,25 @@ class MotionFeatures {
     );
     //console.log(this._loopIndexPeriod);
     this._loopIndex = 0;
+
+    const hasGyrZcr = this._params.descriptors.indexOf('gyrZcr') > -1;
+    const hasAccZcr = this._params.descriptors.indexOf('accZcr') > -1;
+
+    if (hasGyrZcr) {
+      this._gyrZcr = new ZeroCrossingRate({
+        noiseThreshold: this._params.gyrZcrNoiseThresh,
+        frameSize: this._params.gyrZcrFrameSize,
+        hopSize: this._params.gyrZcrHopSize
+      });
+    }
+
+    if (hasAccZcr) {
+      this._accZcr = new ZeroCrossingRate({
+        noiseThreshold: this._params.accZcrNoiseThresh,
+        frameSize: this._params.accZcrFrameSize,
+        hopSize: this._params.accZcrHopSize
+      });
+    }
   }
 
   //========== interface =========//
@@ -650,6 +682,30 @@ class MotionFeatures {
     }
   }
 
+  //===================================================================== gyrZcr
+  /** @private */
+
+  _updateGyrZcr(res) {
+    const zcrRes = this._gyrZcr.process(this._gyrNorm);
+    res.gyrZcr = {
+      amplitude: zcrRes.amplitude,
+      frequency: zcrRes.frequency,
+      periodicity: zcrRes.periodicity,
+    };
+  }
+
+  //===================================================================== accZcr
+  /** @private */
+
+  _updateAccZcr(res) {
+    const accRes = this._accZcr.process(this._accNorm);
+    res.accZcr = {
+      amplitude: accZcr.amplitude,
+      frequency: accZcr.frequency,
+      periodicity: accZcr.periodicity,
+    };
+  }
+
   //==========================================================================//
   //================================ UTILITIES ===============================//
   //==========================================================================//
@@ -696,12 +752,6 @@ class MotionFeatures {
     return (xyzArray[1] - xyzArray[2]) * (xyzArray[1] - xyzArray[2]) +
            (xyzArray[0] - xyzArray[1]) * (xyzArray[0] - xyzArray[1]) +
            (xyzArray[2] - xyzArray[0]) * (xyzArray[2] - xyzArray[0]);
-  }
-
-  _zeroCrossingRate(val) {
-    let power, frequency, periodicity;
-    
-    return [ power, frequency, periodicity ];
   }
 }
 

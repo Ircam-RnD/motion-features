@@ -1,7 +1,10 @@
 /** @todo : add integrated buffer here for optimized statistics computing */
 
 const defaults = {
-  noiseThreshold: 0.1
+  noiseThreshold: 0.1,
+  // this is used only with internal circular buffer (fed sample by sample)
+  frameSize: 50,
+  hopSize: 5
 };
 
 class ZeroCrossingRate {
@@ -15,18 +18,59 @@ class ZeroCrossingRate {
     this.crossings = [];
     this.periodMean = 0;
     this.periodStdDev = 0;
+    this.inputFrame = [];
 
-    this.noiseThreshold = options.noiseThreshold;
+    this.setConfig(options);
 
     //this.maxFreq = this.inputRate / 0.5;    
   }
 
-  setNoiseThreshold(thresh) {
-    this.noiseThreshold = thresh;
+  setConfig(cfg) {
+    if (cfg.noiseThreshold) {
+      this.noiseThreshold = cfg.noiseThreshold;
+    }
+
+    if (cfg.frameSize) {
+      this.frameSize = cfg.frameSize;
+    }
+
+    if (cfg.hopSize) {
+      this.hopSize = cfg.hopSize;
+    }
+
+    this.inputBuffer = new Array(this.frameSize);
+    for (let i = 0; i < this.frameSize; i++) {
+      this.inputBuffer[i] = 0;
+    }
+
+    this.hopCounter = 0;
+    this.bufferIndex = 0;
+
+    this.results = {
+      amplitude: 0,
+      frequency: 0,
+      periodicity: 0
+    };
+  }
+
+  process(value) {
+    // update internal circular buffer
+    // then call processFrame(this.inputBuffer) if needed
+    this.inputBuffer[this.bufferIndex] = value;
+    this.bufferIndex = (this.bufferIndex + 1) % this.frameSize;
+
+    if (this.hopCounter === this.hopSize - 1) {
+      this.hopCounter = 0;
+      this.processFrame(this.inputBuffer, this.bufferIndex)
+    } else {
+      this.hopCounter++;
+    }
+
+    return this.results;
   }
 
   // compute magnitude, zero crossing rate, and periodicity
-  process(frame) {
+  processFrame(frame, offset = 0) {
     this.inputFrame = frame;
 
     this._mainAlgorithm();
@@ -34,7 +78,7 @@ class ZeroCrossingRate {
     // TODO: improve this (2.0 is empirical factor because we don't know a priori sensor range)
     this.amplitude = this.stdDev * 2.0;
 
-    console.log(this.crossings.length);
+    // console.log(this.crossings.length);
     // not used anymore (remove ?)
     // this.frequency = Math.sqrt(this.crossings.length * 2.0 / this.inputFrame.length); // sqrt'ed normalized by nyquist freq
 
@@ -56,11 +100,11 @@ class ZeroCrossingRate {
       this.periodicity = 0;
     }
 
-    return {
-      amplitude: this.amplitude,
-      frequency: this.frequency,
-      periodicity: this.periodicity
-    };
+    this.results.amplitude = this.amplitude;
+    this.results.frequency = this.frequency;
+    this.results.periodicity = this.periodicity;
+
+    return this.results;
   }
 
   _mainAlgorithm() {
@@ -80,6 +124,7 @@ class ZeroCrossingRate {
         min = val;
       }
     }
+
     // TODO : more tests to determine which mean (true mean or (max-min)/2) is the best
     //this.mean /= this.inputFrame.length;
     this.mean = min + (max - min) * 0.5;
